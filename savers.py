@@ -48,7 +48,7 @@ def clean_json(data):
     """
     Function to clean JSON data.
     Uses fill_gaps function,
-    then deletes "track_code", "can_access_closed", "is_closed" fields from data.
+    then order fields and drop unwanted data.
     :param data: JSON data.
     :return: Reformatted JSON data.
     """
@@ -89,7 +89,7 @@ def bdate_to_iso(bdate):
 
 def save_as_sv(data, path, data_ext=".csv"):
     """
-    Function to save data in separated-values formatted files (example: .csv, .tsv, e.t.c.).
+    Function to save data in separated-values formatted files (example: .csv, .tsv, etc).
     :param data: JSON data.
     :param path: Path to save a file.
     :param data_ext: Output file extension.
@@ -121,7 +121,7 @@ def save_as_json(data, path):
     """
     data = clean_json(data)
 
-    # after a mess below, we will get JSON formatted like this:
+    # after a messy code below, we will get JSON formatted like this:
     # [[{}, {}, {}], [{}, ...], [{}, ...], ..., [{}, ...]]
     # |           |  |       |  |       |       |       |
     #   1st part      2nd        3d              last
@@ -131,7 +131,7 @@ def save_as_json(data, path):
         # if a file is empty, dump data
         if file.tell() == 0:
             file.write(json.dumps([data["items"]], indent=2).encode())
-        # else: put caveat symbol back, delete "]" symbol and write extra data
+        # else: put caveat one symbol back, delete "]" and write extra data
         else:
             file.seek(-1, 2)
             file.truncate()

@@ -14,9 +14,6 @@ def get_friends_list(user_access_token, profile_id="", offset=0, count=250):
     if user_access_token is None:
         raise ValueError("[!] User access token is empty")
 
-    if not profile_id.isdigit() and profile_id != "":
-        raise ValueError("[!] User ID is not a number")
-
     result = requests.get("https://api.vk.com/method/friends.get",
                           params={
                               "access_token": user_access_token,
