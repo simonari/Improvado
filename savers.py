@@ -3,8 +3,9 @@ import os
 import csv
 import json
 
+from collections import OrderedDict
 
-supported_ext = [".csv", ".tsv", ".json"]
+
 sv_delimiters = {
     ".csv": ",",
     ".tsv": "\t",
@@ -25,7 +26,7 @@ def fill_gaps(data):
         if "city" not in friend:
             friend["city"] = None
         else:
-            friend["city"] = friend["city"]["title"]\
+            friend["city"] = friend["city"]["title"]
 
         if "country" not in friend:
             friend["country"] = None
@@ -52,10 +53,16 @@ def clean_json(data):
     :return: Reformatted JSON data.
     """
     fill_gaps(data)
-    for friend in data["items"]:
-        del friend["track_code"]
-        del friend["can_access_closed"]
-        del friend["is_closed"]
+
+    for i, friend in enumerate(data["items"]):
+        data["items"][i] = OrderedDict([
+            ("first_name", friend["first_name"]),
+            ("last_name", friend["last_name"]),
+            ("country", friend["country"]),
+            ("city", friend["city"]),
+            ("bdate", friend["bdate"]),
+            ("sex", friend["sex"])
+        ])
 
     return data
 
@@ -64,9 +71,8 @@ def bdate_to_iso(bdate):
     """
     Function to convert date to ISO format.
     :param bdate: Date of format <dd.mm.yyyy>.
-    :return:
-    Date is ISO format: YYYY-MM-DD.
-    If year is not presented, year part is replaced with "XXXX"
+    :return: Date is ISO format: YYYY-MM-DD.
+             If year is not presented, year part is replaced with "XXXX"
     """
     if bdate is None:
         return None
@@ -81,7 +87,7 @@ def bdate_to_iso(bdate):
     return bdate
 
 
-def save_as_sv(data, path, data_ext="csv"):
+def save_as_sv(data, path, data_ext=".csv"):
     """
     Function to save data in separated-values formatted files (example: .csv, .tsv, e.t.c.).
     :param data: JSON data.
@@ -98,10 +104,10 @@ def save_as_sv(data, path, data_ext="csv"):
             writer.writerow([
                 friend["first_name"],
                 friend["last_name"],
-                friend["sex"],
-                friend["bdate"],
+                friend["country"],
                 friend["city"],
-                friend["country"]
+                friend["bdate"],
+                friend["sex"]
             ])
 
     print(f"[+] Report saved to {path}!")
@@ -115,8 +121,23 @@ def save_as_json(data, path):
     """
     data = clean_json(data)
 
-    with open(path, "a") as file:
-        json.dump(data["items"], file, indent=2)
+    # after a mess below, we will get JSON formatted like this:
+    # [[{}, {}, {}], [{}, ...], [{}, ...], ..., [{}, ...]]
+    # |           |  |       |  |       |       |       |
+    #   1st part      2nd        3d              last
+    with open(path, "ab") as file:
+        # set caveat to eof
+        file.seek(0, 2)
+        # if a file is empty, dump data
+        if file.tell() == 0:
+            file.write(json.dumps([data["items"]], indent=2).encode())
+        # else: put caveat symbol back, delete "]" symbol and write extra data
+        else:
+            file.seek(-1, 2)
+            file.truncate()
+            file.write(' , '.encode())
+            file.write(json.dumps(data["items"], indent=2).encode())
+            file.write("]".encode())
 
     print(f"[+] Report saved to {path}!")
 
@@ -131,7 +152,7 @@ def save(data, path):
     filename, data_ext = os.path.splitext(file)
 
     # saving as JSON
-    if data_ext == "json":
+    if data_ext == ".json":
         save_as_json(data, path)
         return
 
@@ -140,14 +161,18 @@ def save(data, path):
 
 
 def create_file(path, data_ext):
-    # TODO doc
+    """
+    Function to create directory and a report file if they are not existing.
+    :param path: Full path to report file.
+    :param data_ext: File extension of report file.
+    """
     if not os.path.isdir(os.path.split(path)[0]):
         os.makedirs(os.path.split(path)[0])
 
     if data_ext in [".csv", ".tsv"]:
         with open(path, "w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file, delimiter=sv_delimiters[data_ext])
-            writer.writerow(["First Name", "Last Name", "Sex", "Birthdate", "City", "Country"])
+            writer.writerow(["First Name", "Last Name", "Country", "City", "Birthdate", "Sex"])
 
     if data_ext == ".json":
-        open(path, encoding="utf-8").close()
+        open(path, "w", encoding="utf-8").close()

@@ -1,7 +1,6 @@
 import requests
 
 
-# TODO made this getter doing its job by parts. Ex 250 rows per request
 def get_friends_list(user_access_token, profile_id="", offset=0, count=250):
     """
     Get the friend list of given profile ID
