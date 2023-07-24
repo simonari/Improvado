@@ -56,22 +56,22 @@ https://api.vk.com/blank.html#code=<your-access-token>
     Returns: access_token of user
 <br>
 <br>
-  - path: api.vk.com
-    - GET: method/friends.get\
-      Request to get friends' list\
-      Parameters:
+- path: api.vk.com
+  - GET: method/friends.get\
+    Request to get friends' list\
+    Parameters:
 
-      | parameter    | info                                        |
-      |--------------|---------------------------------------------|
-      | access_token | User's access token                         |
-      | user_id      | Profile ID of user to get it's friends list |
-      | order        | Order of data in response                   |
-      | fields       | A list of fields to get                     |
-      | offset       | Offset from the beginning of friends list   |
-      | count        | How much friends to get per request         |
-      | v            | Version of an API                           |
+    | parameter    | info                                        |
+    |--------------|---------------------------------------------|
+    | access_token | User's access token                         |
+    | user_id      | Profile ID of user to get it's friends list |
+    | order        | Order of data in response                   |
+    | fields       | A list of fields to get                     |
+    | offset       | Offset from the beginning of friends list   |
+    | count        | How much friends to get per request         |
+    | v            | Version of an API                           |
 
-      Returns: JSON response, containing part or whole friends list
+    Returns: JSON response, containing part or whole friends list
 ## [Supported Extensions]()
 This app can save report files in the following extensions:
 - .csv
