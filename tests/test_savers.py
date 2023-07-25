@@ -1,6 +1,8 @@
 import unittest
-from unittest import TestCase
+import os
+import json
 from collections import OrderedDict
+
 import savers
 
 
@@ -131,6 +133,283 @@ class CleanJSONFunction(unittest.TestCase):
         savers.clean_json(test_val)
 
         self.assertEqual(test_val, true_val)
+
+
+class CreateFileFunction(unittest.TestCase):
+    def test_json(self):
+        test_vals = [
+            os.path.join(os.getcwd(), "report.json"),
+            os.path.join(os.path.dirname(os.getcwd()), "report.json")
+        ]
+
+        for test_val in test_vals:
+            savers.create_file(test_val)
+
+            with open(test_val) as f:
+                f.seek(0, os.SEEK_END)
+                self.assertTrue(f.tell() == 0)
+            os.remove(test_val)
+
+    def test_sv(self):
+        test_vals = [
+            os.path.join(os.getcwd(), "report.csv"),
+            os.path.join(os.path.dirname(os.getcwd()), "report.tsv")
+        ]
+        true_vals = [
+            ["First Name,Last Name,Country,City,Birthdate,Sex\n"],
+            ["First Name\tLast Name\tCountry\tCity\tBirthdate\tSex\n"]
+        ]
+
+        for i, test_val in enumerate(test_vals):
+            savers.create_file(test_val)
+            with open(test_val) as f:
+                self.assertEqual(f.readlines(), true_vals[i])
+            os.remove(test_val)
+
+
+class SaveReport(unittest.TestCase):
+    def test_csv_single_write(self):
+        test_val = {"count": 3,
+                    "items": [
+                        {'id': 1, 'bdate': '16.4.2002',
+                         'city': {'id': 1, 'title': 'city_A'},
+                         'country': {'id': 1, 'title': 'country_A'},
+                         'track_code': 'track_A',
+                         'sex': 2,
+                         'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                         'can_access_closed': True, 'is_closed': False},
+                        {'id': 2, 'bdate': '4.2',
+                         'track_code': 'track_B', 'sex': 1,
+                         'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                         'can_access_closed': True, 'is_closed': True},
+                        {'id': 3, 'bdate': '6.4',
+                         'track_code': 'track_C',
+                         'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                         'can_access_closed': True, 'is_closed': True}
+                    ]}
+
+        true_val = [
+            "First Name,Last Name,Country,City,Birthdate,Sex\n",
+            "first_name_A,last_name_A,country_A,city_A,2002-04-16,Male\n",
+            "first_name_B,last_name_B,,,XXXX-02-04,Female\n",
+            "first_name_C,last_name_C,,,XXXX-04-06,\n"
+        ]
+
+        path = os.path.join(os.getcwd(), "report.csv")
+        savers.create_file(path)
+        savers.save(test_val, path)
+
+        with open(path) as f:
+            self.assertEqual(f.readlines(), true_val)
+
+        os.remove(path)
+
+    def test_tsv_single_write(self):
+        test_val = {"count": 3,
+                    "items": [
+                        {'id': 1, 'bdate': '16.4.2002',
+                         'city': {'id': 1, 'title': 'city_A'},
+                         'country': {'id': 1, 'title': 'country_A'},
+                         'track_code': 'track_A',
+                         'sex': 2,
+                         'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                         'can_access_closed': True, 'is_closed': False},
+                        {'id': 2, 'bdate': '4.2',
+                         'track_code': 'track_B', 'sex': 1,
+                         'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                         'can_access_closed': True, 'is_closed': True},
+                        {'id': 3, 'bdate': '6.4',
+                         'track_code': 'track_C',
+                         'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                         'can_access_closed': True, 'is_closed': True}
+                    ]}
+
+        true_val = [
+            "First Name\tLast Name\tCountry\tCity\tBirthdate\tSex\n",
+            "first_name_A\tlast_name_A\tcountry_A\tcity_A\t2002-04-16\tMale\n",
+            "first_name_B\tlast_name_B\t\t\tXXXX-02-04\tFemale\n",
+            "first_name_C\tlast_name_C\t\t\tXXXX-04-06\t\n"
+        ]
+
+        path = os.path.join(os.getcwd(), "report.tsv")
+        savers.create_file(path)
+        savers.save(test_val, path)
+
+        with open(path) as f:
+            self.assertEqual(f.readlines(), true_val)
+
+        os.remove(path)
+
+    def test_json_single_write(self):
+        test_val = {"count": 3,
+                    "items": [
+                        {'id': 1, 'bdate': '16.4.2002',
+                         'city': {'id': 1, 'title': 'city_A'},
+                         'country': {'id': 1, 'title': 'country_A'},
+                         'track_code': 'track_A',
+                         'sex': 2,
+                         'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                         'can_access_closed': True, 'is_closed': False},
+                        {'id': 2, 'bdate': '4.2',
+                         'track_code': 'track_B', 'sex': 1,
+                         'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                         'can_access_closed': True, 'is_closed': True},
+                        {'id': 3, 'bdate': '6.4',
+                         'track_code': 'track_C',
+                         'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                         'can_access_closed': True, 'is_closed': True}
+                    ]}
+
+        true_val = [[
+            {"first_name": "first_name_A", "last_name": "last_name_A",
+             "country": "country_A", "city": "city_A", "bdate": "2002-04-16", "sex": "Male"},
+            {"first_name": "first_name_B", "last_name": "last_name_B",
+             "country": None, "city": None, "bdate": "XXXX-02-04", "sex": "Female"},
+            {"first_name": "first_name_C", "last_name": "last_name_C",
+             "country": None, "city": None, "bdate": "XXXX-04-06", "sex": None}
+        ]]
+
+        path = os.path.join(os.getcwd(), "report.json")
+        savers.create_file(path)
+        savers.save(test_val, path)
+
+        with open(path, encoding="utf-8") as f:
+            act_val = json.load(f)
+
+        self.assertEqual(act_val, true_val)
+
+        os.remove(path)
+
+    def test_csv_multiple_write(self):
+        test_val = [{"count": 1,
+                     "items": [
+                         {'id': 1, 'bdate': '16.4.2002',
+                          'city': {'id': 1, 'title': 'city_A'},
+                          'country': {'id': 1, 'title': 'country_A'},
+                          'track_code': 'track_A',
+                          'sex': 2,
+                          'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                          'can_access_closed': True, 'is_closed': False}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 2, 'bdate': '4.2',
+                          'track_code': 'track_B', 'sex': 1,
+                          'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                          'can_access_closed': True, 'is_closed': True}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 3, 'bdate': '6.4',
+                          'track_code': 'track_C',
+                          'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                          'can_access_closed': True, 'is_closed': True}
+                     ]}]
+
+        true_val = [
+            "First Name,Last Name,Country,City,Birthdate,Sex\n",
+            "first_name_A,last_name_A,country_A,city_A,2002-04-16,Male\n",
+            "first_name_B,last_name_B,,,XXXX-02-04,Female\n",
+            "first_name_C,last_name_C,,,XXXX-04-06,\n"
+        ]
+
+        path = os.path.join(os.getcwd(), "report.csv")
+        savers.create_file(path)
+
+        for i in range(len(test_val)):
+            savers.save(test_val[i], path)
+
+        with open(path) as f:
+            self.assertEqual(f.readlines(), true_val)
+
+        os.remove(path)
+
+    def test_tsv_multiple_write(self):
+        test_val = [{"count": 1,
+                     "items": [
+                         {'id': 1, 'bdate': '16.4.2002',
+                          'city': {'id': 1, 'title': 'city_A'},
+                          'country': {'id': 1, 'title': 'country_A'},
+                          'track_code': 'track_A',
+                          'sex': 2,
+                          'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                          'can_access_closed': True, 'is_closed': False}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 2, 'bdate': '4.2',
+                          'track_code': 'track_B', 'sex': 1,
+                          'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                          'can_access_closed': True, 'is_closed': True}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 3, 'bdate': '6.4',
+                          'track_code': 'track_C',
+                          'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                          'can_access_closed': True, 'is_closed': True}
+                     ]}
+                    ]
+
+        true_val = [
+            "First Name\tLast Name\tCountry\tCity\tBirthdate\tSex\n",
+            "first_name_A\tlast_name_A\tcountry_A\tcity_A\t2002-04-16\tMale\n",
+            "first_name_B\tlast_name_B\t\t\tXXXX-02-04\tFemale\n",
+            "first_name_C\tlast_name_C\t\t\tXXXX-04-06\t\n"
+        ]
+
+        path = os.path.join(os.getcwd(), "report.tsv")
+        savers.create_file(path)
+
+        for i in range(len(test_val)):
+            savers.save(test_val[i], path)
+
+        with open(path) as f:
+            self.assertEqual(f.readlines(), true_val)
+
+        os.remove(path)
+
+    def test_json_multiple_write(self):
+        test_val = [{"count": 1,
+                     "items": [
+                         {'id': 1, 'bdate': '16.4.2002',
+                          'city': {'id': 1, 'title': 'city_A'},
+                          'country': {'id': 1, 'title': 'country_A'},
+                          'track_code': 'track_A',
+                          'sex': 2,
+                          'first_name': 'first_name_A', 'last_name': 'last_name_A',
+                          'can_access_closed': True, 'is_closed': False}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 2, 'bdate': '4.2',
+                          'track_code': 'track_B', 'sex': 1,
+                          'first_name': 'first_name_B', 'last_name': 'last_name_B',
+                          'can_access_closed': True, 'is_closed': True}]},
+                    {"count": 1,
+                     "items": [
+                         {'id': 3, 'bdate': '6.4',
+                          'track_code': 'track_C',
+                          'first_name': 'first_name_C', 'last_name': 'last_name_C',
+                          'can_access_closed': True, 'is_closed': True}
+                     ]}]
+
+        true_val = [
+            [{"first_name": "first_name_A", "last_name": "last_name_A",
+              "country": "country_A", "city": "city_A", "bdate": "2002-04-16", "sex": "Male"}],
+            [{"first_name": "first_name_B", "last_name": "last_name_B",
+              "country": None, "city": None, "bdate": "XXXX-02-04", "sex": "Female"}],
+            [{"first_name": "first_name_C", "last_name": "last_name_C",
+              "country": None, "city": None, "bdate": "XXXX-04-06", "sex": None}]
+        ]
+
+        path = os.path.join(os.getcwd(), "report.json")
+        savers.create_file(path)
+
+        for i in range(len(test_val)):
+            savers.save(test_val[i], path)
+
+        with open(path, encoding="utf-8") as f:
+            act_val = json.load(f)
+
+        self.assertEqual(act_val, true_val)
+
+        os.remove(path)
 
 
 if __name__ == '__main__':
