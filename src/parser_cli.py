@@ -11,4 +11,4 @@ parser.add_argument("-i", "--id", dest="id",
                     help="User's ID to get friends list from\n(Default: <your ID>)")
 parser.add_argument("-p", "--path", dest="path",
                     default=os.path.join(os.getcwd(), "report.csv"),
-                    help="Path to save a report file (Default: <root/report.csv>)")
+                    help="Path to save a report file (Default: <root>/report.csv)")
