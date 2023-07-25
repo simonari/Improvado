@@ -12,7 +12,7 @@ sv_delimiters = {
 }
 
 
-def fill_gaps(data):
+def fill_gaps(data: dict) -> None:
     """
     Function to reformat data in a way that is easier to work with.
     Filling empty values with None.
@@ -44,7 +44,7 @@ def fill_gaps(data):
             friend["sex"] = "Female" if friend["sex"] == 1 else "Male"
 
 
-def clean_json(data):
+def clean_json(data: dict) -> dict:
     """
     Function to clean JSON data.
     Uses fill_gaps function,
@@ -67,7 +67,7 @@ def clean_json(data):
     return data
 
 
-def bdate_to_iso(bdate):
+def bdate_to_iso(bdate: str) -> str | None:
     """
     Function to convert date to ISO format.
     :param bdate: Date of format <dd.mm.yyyy>.
@@ -87,7 +87,7 @@ def bdate_to_iso(bdate):
     return bdate
 
 
-def save_as_sv(data, path):
+def save_as_sv(data: dict, path: str) -> None:
     """
     Function to save data in separated-values formatted files (example: .csv, .tsv, etc).
     :param data: JSON data.
@@ -111,7 +111,7 @@ def save_as_sv(data, path):
             ])
 
 
-def save_as_json(data, path):
+def save_as_json(data: dict, path: str) -> None:
     """
     Function to save data in .json format.
     :param data: JSON data.
@@ -138,7 +138,7 @@ def save_as_json(data, path):
             file.write("]".encode())
 
 
-def save(data, path):
+def save(data: dict, path: str) -> None:
     """
     Handler function to specify how to save data.
     :param data: JSON data.
@@ -155,7 +155,7 @@ def save(data, path):
     save_as_sv(data, path)
 
 
-def create_file(path):
+def create_file(path: str) -> None:
     """
     Function to create directory and a report file if they are not existing.
     :param path: Full path to report file.

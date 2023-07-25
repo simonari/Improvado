@@ -1,15 +1,14 @@
 import requests
 
 
-def get_friends_list(user_access_token, profile_id="", offset=0, count=250):
+def get_friends_list(user_access_token: str, user_id: str = "", offset: int = 0, count: int = 250) -> tuple[dict, int]:
     """
-    Get the friend list of given profile ID
-    :param user_access_token: User's access token
-    :param profile_id: Profile ID to get a friend list from.
-    Leave blank to get your friend list.
+    Get the friend list of given profile ID.
+    :param user_access_token: User's access token.
+    :param user_id: ID of user to get a friend list from.
     :param offset: Offset of the friend list.
     :param count: Number of friends to get.
-    :return: JSON object containing info about the friend list
+    :return: Tuple of JSON data and number of friends left.
     """
     if user_access_token is None:
         raise ValueError("[!] User access token is empty")
@@ -17,7 +16,7 @@ def get_friends_list(user_access_token, profile_id="", offset=0, count=250):
     result = requests.get("https://api.vk.com/method/friends.get",
                           params={
                               "access_token": user_access_token,
-                              "user_id": profile_id,
+                              "user_id": user_id,
                               "order": "name",
                               "fields": "city,country,bdate,sex",
                               "offset": offset,
@@ -35,6 +34,6 @@ def get_friends_list(user_access_token, profile_id="", offset=0, count=250):
             exit()
     except KeyError:
         # Else, return a friend list
-        print(f"[+] Friend list of profile {profile_id} received!")
+        print(f"[+] Friend list of profile {user_id} received!")
         friends_left = int(result["response"]["count"]) - offset - count
         return result["response"], friends_left
