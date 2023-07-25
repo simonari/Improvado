@@ -2,6 +2,7 @@ import os
 
 import csv
 import json
+from datetime import datetime
 
 from collections import OrderedDict
 
@@ -44,7 +45,7 @@ def fill_gaps(data: dict) -> None:
             friend["sex"] = "Female" if friend["sex"] == 1 else "Male"
 
 
-def clean_json(data: dict) -> dict:
+def clean_data(data: dict) -> dict:
     """
     Function to clean JSON data.
     Uses fill_gaps function,
@@ -58,10 +59,10 @@ def clean_json(data: dict) -> dict:
         data["items"][i] = OrderedDict([
             ("first_name", friend["first_name"]),
             ("last_name", friend["last_name"]),
-            ("country", friend["country"]),
-            ("city", friend["city"]),
-            ("bdate", friend["bdate"]),
-            ("sex", friend["sex"])
+            ("country", friend["country"]["title"] if "country" in friend else None),
+            ("city", friend["city"]["title"] if "city" in friend else None),
+            ("bdate", friend["bdate"] if "bdate" in friend else None),
+            ("sex", friend["sex"] if "sex" in friend else None)
         ])
 
     return data
@@ -77,12 +78,10 @@ def bdate_to_iso(bdate: str) -> str | None:
     if bdate is None:
         return None
 
-    bdate_s = list(map(int, bdate.split(".")))
-
-    if len(bdate_s) == 3:
-        bdate = f"{bdate_s[2]}-{bdate_s[1]:02d}-{bdate_s[0]:02d}"
-    else:
-        bdate = f"XXXX-{bdate_s[1]:02d}-{bdate_s[0]:02d}"
+    try:
+        bdate = datetime.strptime(bdate, "%d.%m.%Y").isoformat(sep="T").split("T")[0]
+    except ValueError:
+        bdate = datetime.strptime(bdate, "%d.%m").isoformat(sep="T").split("T")[0]
 
     return bdate
 
@@ -97,7 +96,7 @@ def save_as_sv(data: dict, path: str) -> None:
 
     with open(path, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=sv_delimiters[data_ext])
-        fill_gaps(data)
+        data = clean_data(data)
         friends = data["items"]
 
         for friend in friends:
@@ -117,7 +116,7 @@ def save_as_json(data: dict, path: str) -> None:
     :param data: JSON data.
     :param path: Path to save a file.
     """
-    data = clean_json(data)
+    data = clean_data(data)
 
     # after a messy code below, we will get JSON formatted like this:
     # [[{}, {}, {}], [{}, ...], [{}, ...], ..., [{}, ...]]

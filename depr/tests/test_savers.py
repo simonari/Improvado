@@ -3,7 +3,7 @@ import os
 import json
 from collections import OrderedDict
 
-import savers
+from depr import savers
 
 
 class DataConversion(unittest.TestCase):
@@ -130,7 +130,7 @@ class CleanJSONFunction(unittest.TestCase):
                         ])
                     ]}
 
-        savers.clean_json(test_val)
+        savers.clean_data(test_val)
 
         self.assertEqual(test_val, true_val)
 
