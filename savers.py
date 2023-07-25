@@ -137,8 +137,6 @@ def save_as_json(data, path):
             file.write(json.dumps(data["items"], indent=2).encode())
             file.write("]".encode())
 
-    print(f"[+] Report saved to {path}!")
-
 
 def save(data, path):
     """
@@ -148,7 +146,6 @@ def save(data, path):
     """
     directory, file = os.path.split(path)
     filename, data_ext = os.path.splitext(file)
-
     # saving as JSON
     if data_ext == ".json":
         save_as_json(data, path)
