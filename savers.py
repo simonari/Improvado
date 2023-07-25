@@ -87,13 +87,13 @@ def bdate_to_iso(bdate):
     return bdate
 
 
-def save_as_sv(data, path, data_ext=".csv"):
+def save_as_sv(data, path):
     """
     Function to save data in separated-values formatted files (example: .csv, .tsv, etc).
     :param data: JSON data.
     :param path: Path to save a file.
-    :param data_ext: Output file extension.
     """
+    data_ext = os.path.splitext(path)[1]
 
     with open(path, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=sv_delimiters[data_ext])
@@ -109,8 +109,6 @@ def save_as_sv(data, path, data_ext=".csv"):
                 friend["bdate"],
                 friend["sex"]
             ])
-
-    print(f"[+] Report saved to {path}!")
 
 
 def save_as_json(data, path):
@@ -157,17 +155,20 @@ def save(data, path):
         return
 
     # saving as .*sv
-    save_as_sv(data, path, data_ext)
+    save_as_sv(data, path)
 
 
-def create_file(path, data_ext):
+def create_file(path):
     """
     Function to create directory and a report file if they are not existing.
     :param path: Full path to report file.
-    :param data_ext: File extension of report file.
     """
-    if not os.path.isdir(os.path.split(path)[0]):
-        os.makedirs(os.path.split(path)[0])
+    directory, filename = os.path.split(path)
+
+    data_ext = os.path.splitext(filename)[1]
+
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
 
     if data_ext in [".csv", ".tsv"]:
         with open(path, "w", encoding="utf-8", newline="") as file:

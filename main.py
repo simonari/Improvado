@@ -30,7 +30,7 @@ def main():
     path_to_save = os.path.join(dir_to_save, filename + data_ext)
 
     clear_reports(path_to_save)
-    savers.create_file(path_to_save, data_ext)
+    savers.create_file(path_to_save)
 
     friends_left = 1
     offset = 0
@@ -39,6 +39,7 @@ def main():
         friends, friends_left = getters.get_friends_list(user_access_token, chosen_profile_id, offset, count)
         savers.save(friends, path_to_save)
         offset += count
+    print(f"[+] Report saved to {path_to_save}!")
 
 
 def clear_reports(path):
