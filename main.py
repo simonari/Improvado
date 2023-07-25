@@ -63,8 +63,12 @@ def validate_inputs(_id: str, path: str) -> tuple[str, str]:
     :param path: Path to save a report file.
     :return: Validated inputs.
     """
+
     if _id is not None and not _id.isdigit():
         raise ValueError("ID must be a positive integer.")
+
+    if _id is None:
+        _id = ""
 
     # TODO: Might add check for correct filename: not containing any special characters.
 
