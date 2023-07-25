@@ -14,20 +14,15 @@ supported_ext = [".csv", ".tsv", ".json"]
 
 def main():
     args = parser_cli.parser.parse_args(sys.argv[1:])
-    print(args.id, args.directory, args.filename, args.extension)
 
-    chosen_profile_id, dir_to_save, filename, data_ext = validate_inputs(args.id,
-                                                                         args.directory,
-                                                                         args.filename,
-                                                                         args.extension)
+    profile_id, path_to_save = args.id, args.path
+    profile_id, path_to_save = validate_inputs(profile_id, path_to_save)
 
-    user_access_token = auth()
     # 690861865 closed to me
     # 263421973
     # 138826891
     # 97846790 > 1000 friends
-
-    path_to_save = os.path.join(dir_to_save, filename + data_ext)
+    user_access_token = auth()
 
     clear_reports(path_to_save)
     savers.create_file(path_to_save)
@@ -36,19 +31,22 @@ def main():
     offset = 0
     count = 250
     while friends_left > 0:
-        friends, friends_left = getters.get_friends_list(user_access_token, chosen_profile_id, offset, count)
+        friends, friends_left = getters.get_friends_list(user_access_token, profile_id, offset, count)
         savers.save(friends, path_to_save)
         offset += count
     print(f"[+] Report saved to {path_to_save}!")
 
 
-def clear_reports(path):
+def clear_reports(path: str):
     """
     Function to clear reports from standard paths, i.e., in project root and from given path to save
     :param path: Path to save a file
     """
     # Clear reports from standard paths
+    cwd = os.getcwd()
     paths_std = ["report.tsv", "report.csv", "report.json"]
+    paths_std = [os.path.join(cwd, path) for path in paths_std]
+
     for path in paths_std:
         if os.path.exists(path):
             os.remove(path)
@@ -58,39 +56,33 @@ def clear_reports(path):
         os.remove(path)
 
 
-def validate_inputs(_id, dir_to_save, filename, data_ext):
+def validate_inputs(_id: str, path: str) -> tuple[str, str]:
     """
     Validate inputs to correctly save data.
     :param _id: User's ID to get friends list from.
-    :param dir_to_save: Directory where a report will be saved.
-                        Default - app root.
-    :param filename: Name of report file.
-    :param data_ext: Extension of a file, which contains report data.
-                     Default: ".csv".
-                     Raises ValueError if data_ext is not supported.
+    :param path: Path to save a report file.
     :return: Validated inputs.
     """
     if _id is not None and not _id.isdigit():
         raise ValueError("ID must be a positive integer.")
 
-    # TODO: Might add check for correct filename: not containing any special characters
+    # TODO: Might add check for correct filename: not containing any special characters.
 
-    if not os.path.isabs(dir_to_save):
-        # If a user enters a relative path with leading slash -> remove it
-        if dir_to_save.startswith("/"):
-            dir_to_save = dir_to_save[1:]
-        # Making path absolute
+    # Check to an absolute path
+    if not os.path.isabs(path):
+        path = os.path.join(os.getcwd(), path)
 
-        dir_to_save = os.path.join(os.getcwd(), dir_to_save)
+    # Check to a valid path
+    if not os.path.isdir(os.path.split(path)[0]):
+        raise ValueError(f"Directory {path} is not valid!")
 
-        if not os.path.isdir(dir_to_save):
-            raise ValueError(f"Directory {dir_to_save} is not valid!")
+    data_ext = os.path.splitext(path)[-1]
 
     if data_ext not in supported_ext:
         raise ValueError(f"Data extension {data_ext} is not supported.\n"
                          f"Supported extensions: {supported_ext}")
 
-    return _id, dir_to_save, filename, data_ext
+    return _id, path
 
 
 if __name__ == '__main__':

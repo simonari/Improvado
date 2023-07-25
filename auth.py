@@ -4,7 +4,7 @@ import webbrowser
 import requests
 
 
-def get_user_auth_code():
+def get_user_auth_code() -> str:
     """
     Authorization function that opens VK authorization page where a client has to copy code from url bar
     :return: Authenticated user's code
@@ -25,7 +25,7 @@ def get_user_auth_code():
     return user_auth_code
 
 
-def get_access_token(user_auth_code):
+def get_access_token(user_auth_code: str) -> str:
     """
     Get expiring access token by generated user authentication code
     :param user_auth_code: User's authentication code
@@ -42,7 +42,7 @@ def get_access_token(user_auth_code):
     return result.json()["access_token"]
 
 
-def auth():
+def auth() -> str:
     """
     Authorization function that gets authentication code via logging user in VK and
     gets access token via request to VK-API.
